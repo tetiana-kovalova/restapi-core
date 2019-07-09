@@ -1,23 +1,23 @@
-import datetime
 import os
 import sys
 
 import nose
 
+from settings import Settings
+
 if __name__ == '__main__':
     module = 'tests'
 
-    now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    allure_folder, result_folder = f'{now}/allure', f'{now}/result'
+    allure_folder, result_folder = Settings().ALLURE_RESULTS_PATH, Settings().API_RESULTS_PATH
 
     for folder in [allure_folder, result_folder]:
         try:
             os.makedirs(folder, 0o777)
             os.chmod(folder, 0o777)
-            print('- bash | makedirs %s' % folder)
+            print(f'- bash       | makedirs {folder}')
         except OSError:
             os.chmod(folder, 0o777)
-            print('- bash | chmod %s' % folder)
+            print(f'- bash       | chmod  {folder}')
     print('')
 
     argv = [sys.argv[0],
@@ -26,12 +26,12 @@ if __name__ == '__main__':
             '--logging-level=WARN',
             '--logging-filter=browser',
             '--with-xunit',
-            '--xunit-file=%s/nosetests.xml' % result_folder,
+            f'--xunit-file={result_folder}/nosetests.xml',
             '--with-allure',
-            '--logdir=%s' % allure_folder,
+            f'--logdir={allure_folder}',
             '--not-clear-logdir',
             module]
 
     nose.run(argv=argv)
 
-    os.system(f'cd {allure_folder} && allure generate . && allure open -p 5000')
+    os.system(f'cd {Settings().ALLURE_RESULTS_PATH} && allure generate . && allure open -p 5000')
