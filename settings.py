@@ -11,7 +11,7 @@ class Settings(object):
     TESTS_PATH = 'tests'
     BASE_URL = 'https://restful-booker.herokuapp.com'
 
-    HEADERS = {"token": "870b237520f4376"}
+    HEADERS = {'Content-Type': 'application/json', 'Cookie': 'token=870b237520f4376'}
 
     COMMAND_EXECUTOR = ''
     ALLURE_RESULTS_PATH = ''
