@@ -10,7 +10,8 @@ from constants import Service
 from settings import Settings
 from utils import attach
 
-HEADERS = Settings.HEADERS
+HOST = Settings.BASE_URL
+HEADERS = {'Content-Type': 'application/json'}
 REST_PREFIX = '- REST       |'
 STATUS_CODES = {Service.GET:    [200, 400, 404],
                 Service.POST:   [200, 400, 404],
@@ -19,12 +20,18 @@ STATUS_CODES = {Service.GET:    [200, 400, 404],
 
 
 class Rest(object):
+    @classmethod
+    def _get_token(cls):
+        route = 'auth'
+        url = f'{HOST}/{route}'
+
+        response = requests.post(url, '{"username": "admin", "password": "password123"}', headers=HEADERS).json()
+
+        return {'Cookie': f'token={response["token"]}'}
 
     @classmethod
     def service(cls, service, route, data=None):
-        host = Settings.BASE_URL
-
-        url = f'{host}/{route}'
+        url = f'{HOST}/{route}'
 
         try:
             response = cls._service(service, url, data=json.dumps(data) if data else None)
@@ -32,13 +39,10 @@ class Rest(object):
             time.sleep(1)
             response = cls._service(service, url, data=json.dumps(data) if data else None)
 
-        if len(response.json()) == 1:
-            content = []
-
-            for item in response.json()['1']:
-                content.append(json.loads(json.dumps(item), object_hook=lambda d: namedtuple('Rest', d.keys())(*d.values())))
-        else:
+        try:
             content = json.loads(response.content, object_hook=lambda d: namedtuple('Rest', d.keys())(*d.values()))
+        except:
+            content = response.content
 
         status_code = response.status_code
 
@@ -46,20 +50,27 @@ class Rest(object):
 
     @classmethod
     def _service(cls, service, url, data):
+        headers = HEADERS
         attach_json(f'{service.upper()} | {url}', data if data else '{"message": "Body is empty"}')
 
-        response = {service == Service.GET:     requests.get(url,        headers=HEADERS),
-                    service == Service.POST:    requests.post(url, data, headers=HEADERS),
-                    service == Service.PUT:     requests.put(url, data,  headers=HEADERS),
-                    service == Service.DELETE:  requests.delete(url,     headers=HEADERS)}[True]
+        if service in [Service.PUT, Service.DELETE]:
+            headers.update(cls._get_token())
 
-        assert_in(response.status_code, STATUS_CODES[service],
-                  f'Invalid Status Code: {response.status_code}\n{response.content}')
+        response = {service == Service.GET:     requests.get(url, headers=headers),
+                    service == Service.POST:    requests.post(url, data, headers=headers),
+                    service == Service.PUT:     requests.put(url, data, headers=headers),
+                    service == Service.DELETE:  requests.delete(url, headers=headers)}[True]
 
+        assert_in(response.status_code, STATUS_CODES[service], f'Invalid Status Code: {response.status_code}\n{response.content}')
         attach_json(f'RESPONSE', response.content)
 
         return response
 
 
 def attach_json(name, data):
-    attach(name, json.dumps(json.loads(data), indent=4, sort_keys=True), AttachmentType.JSON)
+    try:
+        attach(name, json.dumps(json.loads(data), indent=4, sort_keys=True), AttachmentType.JSON)
+    except:
+        attach(name, data, AttachmentType.TEXT)
+
+

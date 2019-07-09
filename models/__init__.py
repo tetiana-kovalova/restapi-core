@@ -1,6 +1,5 @@
 from constants import Service
 from services import REST_PREFIX, Rest
-from settings import Settings
 
 from utils import step
 
@@ -60,3 +59,8 @@ class Booking(Rest):
                 "additionalneeds":  booking.additionalneeds}
 
         return self.service(Service.PUT, f'booking/{booking.bookingid}', data)
+
+    @step('Rest > Delete Booking [id={1}]')
+    def delete_booking(self, bookingid):
+        print(f'{REST_PREFIX} DELETE Booking [id={bookingid}]')
+        return self.service(Service.DELETE, f'booking/{bookingid}')
