@@ -14,7 +14,7 @@ class Enum(object):
         return [v for k, v in self if v not in exclude]
 
 
-class Service(Enum):
+class Method(Enum):
     GET = 'get'
     POST = 'post'
     PUT = 'put'
