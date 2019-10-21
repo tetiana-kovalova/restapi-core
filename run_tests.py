@@ -1,25 +1,20 @@
 import os
 import sys
 
-import nose
-
-from settings import Settings
+import pytest
+from utils.logger import BaseLogger
 
 if __name__ == '__main__':
+
     module = 'tests'
 
     argv = [sys.argv[0],
             '--verbosity=0',
-            '--nocapture',
-            '--logging-level=WARN',
-            '--logging-filter=browser',
-            '--with-xunit',
-            f'--xunit-file={Settings().API_RESULTS_PATH}/nosetests.xml',
-            '--with-allure',
-            f'--logdir={Settings().ALLURE_RESULTS_PATH}',
-            '--not-clear-logdir',
+            '--show-capture=stdout',
+            f'--alluredir={BaseLogger.allure_path}',
             module]
 
-    nose.run(argv=argv)
+    pytest.main(args=argv)
 
-    os.system(f'cd {Settings().ALLURE_RESULTS_PATH} && allure generate . && allure open -p 5000')
+    os.system(f'cd {BaseLogger.allure_path} && allure generate . && allure open -p 5000')
+

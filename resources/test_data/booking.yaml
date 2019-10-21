@@ -1,0 +1,28 @@
+- id: booking1
+  firstname: Nick
+  lastname: Smith
+  bookingdates:
+    checkin: 2021-10-06
+    checkout: 2021-11-06
+  totalprice: 500
+  depositpaid: false
+  additionalneeds: Breakfast
+
+- id: booking2
+  firstname: Mary
+  lastname: Berry
+  bookingdates:
+    checkin: 2021-10-06
+    checkout: 2025-10-06
+  totalprice: 100500
+  depositpaid: true
+  additionalneeds: Dry Towel
+
+- id: booking3
+  firstname: Mary
+  bookingdates:
+    checkin: 2021-10-06
+    checkout: 2021-10-06
+  totalprice: 100500
+  depositpaid: true
+  additionalneeds: null
